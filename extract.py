@@ -2,47 +2,50 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import date, timedelta
+def extract_last_7_days():
 
-load_dotenv()
-app_token = os.getenv("NYC_APP_TOKEN")
-print(app_token is not None)
-url = "https://data.cityofnewyork.us/resource/erm2-nwe9.json"
+    load_dotenv()
+    app_token = os.getenv("NYC_APP_TOKEN")
+    if app_token is None:
+        raise Exception(f"App token unable to retrieve data")
+    url = "https://data.cityofnewyork.us/resource/erm2-nwe9.json"
 
-all_rows = []
-offset = 0
-limit = 10000
+    all_rows = []
+    offset = 0
+    limit = 10000
 
-start = date.today() #This pulls todays date
-end = start - timedelta(days = 7) #Pulls a week before today
+    window_end = date.today() #This pulls todays date
+    window_start = window_end - timedelta(days = 7) #Pulls a week before today
 
-headers = {
-    "X-App-Token": app_token
-}
-
-while True:
-    params = {
-        "$where": f"created_date >= '{end}' AND created_date < '{start}'",
-        "$order": "unique_key",
-        "$limit": limit,
-        "$offset": offset,
+    headers = {
+        "X-App-Token": app_token
     }
 
-    response = requests.get(url, params=params, headers = headers, timeout=60)
+    while True:
+        params = {
+            "$where": f"created_date >= '{window_start}' AND created_date < '{window_end}'",
+            "$order": "unique_key",
+            "$limit": limit,
+            "$offset": offset,
+        }
 
-    if response.status_code != 200:
-        raise Exception(f"You received an error with {response.status_code} response code at offset {offset}")
+        response = requests.get(url, params=params, headers = headers, timeout=60)
 
-    data = response.json()
+        if response.status_code != 200:
+            raise Exception(f"You received an error with {response.status_code} response code at offset {offset}")
 
-    print(offset, len(data))
+        data = response.json()
 
-    all_rows.extend(data)
+        print(offset, len(data))
 
-    if len(data) < limit:
-        break
+        all_rows.extend(data)
 
-    offset += limit
+        if len(data) < limit:
+            break
 
-print(len(all_rows))
-print(response.status_code)
-print(all_rows[-3:])
+        offset += limit
+    return all_rows
+
+if __name__ == "__main__":
+    rows = extract_last_7_days()
+    print(f"Extracted {len(rows)} rows")
