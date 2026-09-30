@@ -6,8 +6,11 @@ def extract_last_7_days():
 
     load_dotenv()
     app_token = os.getenv("NYC_APP_TOKEN")
-    if app_token is None:
-        raise Exception(f"App token unable to retrieve data")
+    if not app_token:
+        raise Exception(
+            "NYC_APP_TOKEN is not set. Add a line like NYC_APP_TOKEN=your_token "
+            "to the .env file in the project folder."
+            )
     url = "https://data.cityofnewyork.us/resource/erm2-nwe9.json"
 
     all_rows = []
@@ -32,7 +35,10 @@ def extract_last_7_days():
         response = requests.get(url, params=params, headers = headers, timeout=60)
 
         if response.status_code != 200:
-            raise Exception(f"You received an error with {response.status_code} response code at offset {offset}")
+            raise Exception((
+                f"API request failed with status {response.status_code} at offset {offset}. "
+                f"Response: {response.text[:500]}"
+            ))
 
         data = response.json()
 
