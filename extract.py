@@ -2,7 +2,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import date, timedelta
-def extract_last_7_days():
+def extract_rows(where):
 
     load_dotenv()
     app_token = os.getenv("NYC_APP_TOKEN")
@@ -15,10 +15,7 @@ def extract_last_7_days():
 
     all_rows = []
     offset = 0
-    limit = 10000
-
-    window_end = date.today() #This pulls todays date
-    window_start = window_end - timedelta(days = 7) #Pulls a week before today
+    limit = 50000
 
     headers = {
         "X-App-Token": app_token
@@ -26,7 +23,7 @@ def extract_last_7_days():
 
     while True:
         params = {
-            "$where": f"created_date >= '{window_start}' OR closed_date >= '{window_start}'",
+            "$where": where,
             "$order": "unique_key",
             "$limit": limit,
             "$offset": offset,
@@ -51,7 +48,10 @@ def extract_last_7_days():
 
         offset += limit
     return all_rows
-
+def extract_last_7_days():
+    window_start = date.today() - timedelta(days=7)
+    where = f"created_date >= '{window_start}' OR (closed_date >= '{window_start}' AND created_date >= '2026-01-01')"
+    return extract_rows(where)
 if __name__ == "__main__":
     rows = extract_last_7_days()
     print(f"Extracted {len(rows)} rows")
