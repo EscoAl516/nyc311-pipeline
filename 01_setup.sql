@@ -59,5 +59,5 @@ CREATE TABLE raw.service_requests (
 	bridge_highway_direction text NULL,
 	road_ramp text NULL,
 	bridge_highway_segment text NULL,
-	CONSTRAINT service_requests_pkey PRIMARY KEY (unique_key),
+	CONSTRAINT service_requests_pkey PRIMARY KEY (unique_key)
 );
