@@ -12,8 +12,6 @@ CREATE DATABASE nyc311;
 -- Raw layer: data exactly as received from the source APIs.
 CREATE SCHEMA raw;
 
--- DROP TABLE raw.service_requests;
-
 CREATE TABLE raw.service_requests (
 	unique_key text NOT NULL,
 	created_date text NULL,
