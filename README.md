@@ -79,6 +79,7 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 ### Pipeline
 
 - **Upsert instead of replace.** The first version replaced the table with the latest 7 days on every run, which threw away history. The table now has a primary key on `unique_key`, and each run inserts new complaints and updates existing ones.
+- **The table is defined in code.** `01_setup.sql` creates `raw.service_requests` with all 44 columns as text, so its shape doesn't depend on which pull happens to run first.
 - **Pull by "filed or closed", not just "filed".** A filter on `created_date` alone has a blind spot: a complaint filed three weeks ago that closes today is outside the window, so the table would show it as open forever. That would push "% still open after 30 days" up and hide real closures. The daily filter therefore also pulls complaints whose `closed_date` is in the window.
 - **Why not `:updated_at`.** The API has a hidden `:updated_at` field that would catch every kind of change. It was tested and rejected: the counts were correct, but response time was unpredictable (3 to 4 minutes for the first page on one run, a timeout past 10 minutes on the next). The filed-or-closed filter returns in seconds and covers the two events the metrics depend on.
 - **A fixed start date, to avoid selection bias.** The filed-or-closed filter on its own pulls in old complaints only when they finally close, for example one filed in 2022 that took four years. A table built that way holds the slowest cases from past years without the fast ones, and any median computed from it would be badly skewed. A period can only be measured if the table holds every complaint filed in it. So the project is scoped to complaints filed on or after 2026-01-01, the backfill loads that whole period, and the daily filter ignores closures of anything filed earlier.
@@ -90,8 +91,8 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 
 - Changes that are neither a filing nor a closure (for example a status moving to "In Progress") are only picked up if the complaint is also inside the 7-day window.
 - A few complaints filed before 2026 are in the raw table from early test runs. Transform filters them out.
-- Creating the main table on a fresh database is a manual step (see Setup).
-- `load.py` assumes each pull is non-empty and has no columns the main table lacks; either case stops the run with an error.
+- The main table's columns are fixed in `01_setup.sql`. If the city adds a column to the dataset, the load stops with an error until the column is added there.
+- `load.py` assumes each pull is non-empty; an empty pull stops the run with an error.
 
 ## Setup / How to Run
 
@@ -121,26 +122,19 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
    DB_NAME=nyc311
    ```
 
-4. **Create the database and schema**
+4. **Create the database, schema, and main table**
    ```bash
    psql -U postgres -f 01_setup.sql
    ```
+   This creates the `nyc311` database, the `raw` schema, and `raw.service_requests` with its primary key on `unique_key`.
 
-5. **First run only: create the main table.** The upsert needs `raw.service_requests` to exist with a primary key. This isn't scripted yet, so do it once by hand:
-   1. Run `python load.py`. It fills the staging table, then stops with an error because the main table doesn't exist.
-   2. In `psql` or DBeaver, connected to `nyc311`, run:
-      ```sql
-      CREATE TABLE raw.service_requests (LIKE raw.service_requests_staging);
-      ALTER TABLE raw.service_requests ADD PRIMARY KEY (unique_key);
-      ```
-
-6. **Load the history**
+5. **Load the history**
    ```bash
    python backfill.py
    ```
    This loads every complaint filed since 2026-01-01, one week at a time, and prints a line per week. Expect it to take a while. If it stops partway, change `start` in `backfill.py` to the last week it printed and run it again.
 
-7. **Keep it current**
+6. **Keep it current**
    ```bash
    python load.py
    ```
@@ -153,8 +147,8 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 - [x] Incremental loading: staging table and upsert on `unique_key`
 - [x] Daily filter that picks up complaints closed after they were filed
 - [x] Backfill of all complaints filed in 2026, verified against the API
-- [ ] Script the main table creation so setup is a single step
-- [ ] Make the load handle empty pulls and new columns
+- [x] Main table and primary key created by the setup script
+- [ ] Make the load handle empty pulls
 - [ ] Extract and load Census ACS table B03002
 - [ ] Transform: cleaning, filtering, metrics, and the 311–Census join in SQL
 - [ ] Serving table and Power BI dashboard
