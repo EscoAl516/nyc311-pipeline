@@ -26,13 +26,13 @@ def extract_last_7_days():
 
     while True:
         params = {
-            "$where": f"created_date >= '{window_start}' AND created_date < '{window_end}'",
+            "$where": f"created_date >= '{window_start}' OR closed_date >= '{window_start}'",
             "$order": "unique_key",
             "$limit": limit,
             "$offset": offset,
         }
 
-        response = requests.get(url, params=params, headers = headers, timeout=60)
+        response = requests.get(url, params=params, headers = headers, timeout=120)
 
         if response.status_code != 200:
             raise Exception((
