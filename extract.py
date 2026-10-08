@@ -5,7 +5,7 @@ from datetime import date, timedelta
 def extract_rows(where):
 
     load_dotenv()
-    app_token = os.getenv("NYC_APP_TOKEN")
+    app_token = os.getenv("NYC_API_TOKEN")
     if not app_token:
         raise Exception(
             "NYC_APP_TOKEN is not set. Add a line like NYC_APP_TOKEN=your_token "
