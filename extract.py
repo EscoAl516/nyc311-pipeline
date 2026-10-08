@@ -8,7 +8,7 @@ def extract_rows(where):
     app_token = os.getenv("NYC_API_TOKEN")
     if not app_token:
         raise Exception(
-            "NYC_APP_TOKEN is not set. Add a line like NYC_APP_TOKEN=your_token "
+            "NYC_API_TOKEN is not set. Add a line like NYC_API_TOKEN=your_token "
             "to the .env file in the project folder."
             )
     url = "https://data.cityofnewyork.us/resource/erm2-nwe9.json"
