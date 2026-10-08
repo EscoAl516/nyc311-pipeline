@@ -13,7 +13,7 @@ It's designed for community organizers and city staff who want to see whether se
 | Source | What it provides | Granularity | Refresh |
 |---|---|---|---|
 | [NYC 311 Service Requests](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9) (NYC Open Data, dataset `erm2-nwe9`) | Every 311 complaint: type, created/closed dates, ZIP, location | One row per complaint | Daily |
-| U.S. Census ACS 5-Year Estimates, table **B03002** (Hispanic or Latino Origin by Race) | Population by race and ethnicity | ZIP code (ZCTA) | Yearly |
+| [U.S. Census ACS 5-Year Estimates](https://www.census.gov/data/developers/data-sets/acs-5year.html), 2024 release, table **B03002** (Hispanic or Latino Origin by Race) | Total population and non-Hispanic white population | One row per ZIP Code Tabulation Area (ZCTA) | Yearly |
 
 **% people of color** per ZIP = (total population − non-Hispanic white population) ÷ total population.
 
@@ -28,9 +28,13 @@ raw.service_requests_staging      temporary, replaced on every run
     ▼  Upsert (SQL): INSERT ... ON CONFLICT (unique_key) DO UPDATE
 raw.service_requests              permanent, one row per complaint, never replaced
     │
-    │◀──── Census ACS B03002 (planned)
-    ▼
-Transform (SQL, planned)
+    │      Census API (ACS 5-year, table B03002)
+    │          │
+    │          ▼  Extract and load (Python): one request, table replaced
+    │      raw.census_b03002      one row per ZCTA, whole US
+    │          │
+    ▼          ▼
+Transform (SQL, planned): join on ZIP
     │
     ▼
 Serving table ──▶ Power BI dashboard (planned)
@@ -49,13 +53,20 @@ Serving table ──▶ Power BI dashboard (planned)
    - A one-time load of history. It walks from January 1, 2026 to today one week at a time, calling the same extract and load functions for each week.
    - It is safe to stop and restart, because reloading a week only updates rows that are already there.
 
-4. **Transform** (SQL, planned)
-   - Clean: convert `"N/A"` and blank strings to `NULL`; cast text to proper types
+4. **Census** (`census.py`)
+   - `extract_census()` makes one request to the Census API for every ZCTA in the country and asks for two numbers from table B03002: total population (`B03002_001E`) and non-Hispanic white population (`B03002_003E`). There is no paging; the whole response is about 33,000 rows.
+   - The response is a list of lists with the column names in the first item, not a list of dictionaries like 311. The first item becomes the column names and the rest become the rows.
+   - It fails loudly on a missing API key, a non-200 response, or a request that takes longer than the timeout.
+   - `load_census()` writes the result to `raw.census_b03002`, replacing the table on every run. Values and column names are stored exactly as received, plus an `acs_year` column added by the pipeline.
+   - Nothing is filtered or calculated here. Narrowing to NYC and computing % people of color happen in Transform.
+
+5. **Transform** (SQL, planned)
+   - Clean: convert `"N/A"` and blank strings to `NULL`; cast text to proper types; rename the Census columns to readable names
    - Filter: keep complaints filed on or after 2026-01-01; remove subway complaints (no neighborhood address) and rows where the closed date is before the created date (counting what's dropped)
    - Calculate: days to close, % people of color per ZIP, ZIP quartile (`NTILE(4)`), duplicate-report flag
    - Join: 311 complaints to Census data on ZIP
 
-5. **Serve** (planned): a final table with one row per ZIP and complaint type:
+6. **Serve** (planned): a final table with one row per ZIP and complaint type:
 
    `zip | quartile | complaint_type | median_days_to_close | pct_open_after_30_days | complaint_count`
 
@@ -87,16 +98,23 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 - **7-day lookback.** The pipeline is currently run by hand, so the window has to be longer than the longest gap between runs. Overlap costs nothing because of the upsert. It can shrink once the pipeline runs on a schedule.
 - **Checked against the source.** After each change, the row count was compared with the API's own `count(*)` for the same filter. Two test weeks matched exactly (68,368 and 67,914), and so did the full backfill (3,025,670).
 
+- **Census: replace, not upsert.** Each Census pull is the complete table, not a slice of it, so nothing in the old copy is worth keeping. That is the opposite of the 311 table, where each pull is one week and a replace would wipe out the rest.
+- **Census column names are kept as received.** The raw table has columns named `B03002_001E` and `zip code tabulation area`, exactly as the API sends them, so raw stays a true copy of the source. The cost is that they need double quotes in SQL. They are renamed once, in Transform.
+- **The ACS year is stored with the data.** Nothing in the API response says which year the numbers are from; the year only appears in the request URL. One `year` variable at the top of `census.py` sets both the URL and the `acs_year` column, so they can't disagree.
+- **Census load checked.** The table has 33,772 rows, which is the 33,773 items in the API response minus the header. No ZCTA has a non-Hispanic white count larger than its total population, and a known ZIP was spot-checked by hand.
+
 ### Known limitations
 
 - Changes that are neither a filing nor a closure (for example a status moving to "In Progress") are only picked up if the complaint is also inside the 7-day window.
 - A few complaints filed before 2026 are in the raw table from early test runs. Transform filters them out.
 - The main table's columns are fixed in `01_setup.sql`. If the city adds a column to the dataset, the load stops with an error until the column is added there.
 - `load.py` assumes each pull is non-empty; an empty pull stops the run with an error.
+- Census ZCTAs approximate USPS ZIP codes but are not identical to them, so some 311 ZIPs may have no Census match. Transform will need to count how many.
+- The ACS year is changed by hand in `census.py` when a new release comes out.
 
 ## Setup / How to Run
 
-**Requirements:** Python 3.11+, PostgreSQL, and a free [NYC Open Data app token](https://data.cityofnewyork.us/profile/edit/developer_settings).
+**Requirements:** Python 3.11+, PostgreSQL, a free [NYC Open Data app token](https://data.cityofnewyork.us/profile/edit/developer_settings), and a free [Census API key](https://api.census.gov/data/key_signup.html).
 
 1. **Clone the repo and create a virtual environment**
    ```bash
@@ -114,7 +132,8 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 
 3. **Create a `.env` file** in the project folder (it's git-ignored, so credentials never reach GitHub):
    ```
-   NYC_APP_TOKEN=your_app_token
+   NYC_API_TOKEN=your_app_token
+   CENSUS_API_TOKEN=your_census_key
    DB_USER=postgres
    DB_PASSWORD=your_password
    DB_HOST=localhost
@@ -134,7 +153,13 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
    ```
    This loads every complaint filed since 2026-01-01, one week at a time, and prints a line per week. Expect it to take a while. If it stops partway, change `start` in `backfill.py` to the last week it printed and run it again.
 
-6. **Keep it current**
+6. **Load the Census data**
+   ```bash
+   python census.py
+   ```
+   This loads the 2024 ACS numbers for every ZCTA into `raw.census_b03002` and prints the row count (33,772). It only needs to run again when a new ACS release comes out: change `year` at the top of `census.py` and rerun.
+
+7. **Keep it current**
    ```bash
    python load.py
    ```
@@ -148,8 +173,8 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 - [x] Daily filter that picks up complaints closed after they were filed
 - [x] Backfill of all complaints filed in 2026, verified against the API
 - [x] Main table and primary key created by the setup script
+- [x] Extract and load Census ACS table B03002
 - [ ] Make the load handle empty pulls
-- [ ] Extract and load Census ACS table B03002
 - [ ] Transform: cleaning, filtering, metrics, and the 311–Census join in SQL
 - [ ] Serving table and Power BI dashboard
 - [ ] Automation with Airflow and Docker
