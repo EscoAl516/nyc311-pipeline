@@ -6,7 +6,33 @@ Does New York City close 311 complaints as quickly in communities of color as it
 
 It's designed for community organizers and city staff who want to see whether service response times differ between neighborhoods. The analysis measures a **disparity** in response times; it does not, on its own, prove discrimination or explain why a gap exists.
 
-**Scope:** every 311 complaint filed on or after January 1, 2026. As of October 5, 2026 that is 3,025,670 complaints, loaded and checked against the source API.
+**Scope:** every 311 complaint filed on or after January 1, 2026, which is about 3 million so far. The backfill was checked against the source API on October 5, 2026 (3,025,670 complaints, an exact match).
+
+## First Results
+
+These are from the data as of October 11, 2026. They are a first look, not a final analysis.
+
+ZIP codes are ranked by % people of color and split into four quartiles. Quartile 1 has the highest share and quartile 4 the lowest. Each complaint type is compared across the four.
+
+**There is no across-the-board gap.** Of the 78 complaint types with enough data to compare, the median time to close is longer in quartile 1 than in quartile 4 for 40, and the same or shorter for 38.
+
+**The differences cluster by kind of complaint.** Tree complaints take longer in quartile 1:
+
+| Complaint type | Median days to close, Q1 | Q4 | % not closed in 30 days, Q1 | Q4 |
+|---|---|---|---|---|
+| Overgrown Tree/Branches | 11.0 | 4.8 | 85.5 | 62.5 |
+| Illegal Tree Damage | 12.9 | 1.9 | 54.5 | 28.0 |
+| Dead/Dying Tree | 14.8 | 11.0 | 63.1 | 48.8 |
+
+Several housing-condition complaints close faster in quartile 1:
+
+| Complaint type | Median days to close, Q1 | Q4 | % not closed in 30 days, Q1 | Q4 |
+|---|---|---|---|---|
+| WATER LEAK | 11.0 | 15.3 | 23.2 | 31.0 |
+| DOOR/WINDOW | 12.8 | 16.2 | 26.9 | 33.5 |
+| UNSANITARY CONDITION | 11.0 | 13.9 | 22.7 | 25.9 |
+
+These numbers show where gaps exist, not why. Quartile 1 files about five times as many water leak complaints as quartile 4, and volume, staffing, and how each agency closes cases could all play a part.
 
 ## Data Sources
 
@@ -34,10 +60,12 @@ raw.service_requests              permanent, one row per complaint, never replac
     │      raw.census_b03002      one row per ZCTA, whole US
     │          │
     ▼          ▼
-Transform (SQL, planned): join on ZIP
+Transform (SQL)
+    analytics.requests_clean          one row per complaint, cleaned
+    analytics.zip_demographics        one row per NYC ZIP, with its quartile
     │
-    ▼
-Serving table ──▶ Power BI dashboard (planned)
+    ▼  join on ZIP, group by complaint type and quartile
+analytics.response_by_quartile_type ──▶ Power BI dashboard (planned)
 ```
 
 1. **Extract** (`extract.py`)
@@ -60,17 +88,24 @@ Serving table ──▶ Power BI dashboard (planned)
    - `load_census()` writes the result to `raw.census_b03002`, replacing the table on every run. Values and column names are stored exactly as received, plus an `acs_year` column added by the pipeline.
    - Nothing is filtered or calculated here. Narrowing to NYC and computing % people of color happen in Transform.
 
-5. **Transform** (SQL, planned)
-   - Clean: convert `"N/A"` and blank strings to `NULL`; cast text to proper types; rename the Census columns to readable names
-   - Filter: keep complaints filed on or after 2026-01-01; remove subway complaints (no neighborhood address) and rows where the closed date is before the created date (counting what's dropped)
-   - Calculate: days to close, % people of color per ZIP, ZIP quartile (`NTILE(4)`), duplicate-report flag
-   - Join: 311 complaints to Census data on ZIP
+5. **Transform** (SQL, three files run in order)
+   - `02_zip_demographics.sql` builds `analytics.zip_demographics`, one row per NYC ZIP. It renames and casts the Census columns, computes % people of color, keeps only ZIPs that belong to NYC (see Key Decisions), and assigns each ZIP a quartile with `NTILE(4)`.
+   - `03_requests_clean.sql` builds `analytics.requests_clean`, one row per complaint. It keeps the ten columns the analysis needs, casts the dates to timestamps, removes rows that can't be used, and adds `days_to_close`. Open complaints are kept, with `days_to_close` empty.
+   - `04_response_by_quartile.sql` builds `analytics.response_by_quartile_type`, one row per complaint type and quartile. It joins the two tables above on ZIP and computes the metrics below.
+   - Every file drops and rebuilds its table, so all three can be rerun after each load.
 
-6. **Serve** (planned): a final table with one row per ZIP and complaint type:
+6. **Serve**: `analytics.response_by_quartile_type` is the table the dashboard reads.
 
-   `zip | quartile | complaint_type | median_days_to_close | pct_open_after_30_days | complaint_count`
+   | Column | Meaning |
+   |---|---|
+   | `complaint_type` | The 311 complaint category |
+   | `quartile` | 1 = ZIPs with the highest % people of color, 4 = the lowest |
+   | `complaint_count` | Complaints of that type filed in that quartile's ZIPs |
+   | `median_days_to_close` | Median time from filed to closed, for closed complaints |
+   | `pct_not_closed_in_30_days` | Of complaints old enough to judge, the percent still open or closed after more than 30 days |
+   | `instant_count`, `pct_closed_instantly` | Complaints closed at the moment they were filed, as a count and as a percent |
 
-   This feeds a Power BI dashboard: median days to close by quartile for a selected complaint type, plus a "find my neighborhood" view.
+   A Power BI dashboard on top of it is planned: median days to close by quartile for a selected complaint type. A ZIP-level table for a "find my neighborhood" view is planned after that.
 
 The raw layer is kept untouched so that Transform logic can be fixed and rerun without calling the API again, and any dashboard number can be traced back to the source data.
 
@@ -78,13 +113,20 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 
 ### Analysis
 
+Counts in this section are from October 9 to 11, 2026.
+
 - **Median, not mean.** A few complaints stay open for months; the median keeps those outliers from distorting typical response times.
+- **A second metric for slow and unclosed complaints.** The median only sees complaints that closed, and it can't tell a group where 1% took months from one where 40% did. So each group also gets **% not closed within 30 days**: complaints that are still open, or that took more than 30 days. Only complaints filed at least 30 days before the newest complaint in the data are counted, because a complaint filed last week hasn't had its 30 days yet.
 - **Compare within complaint type.** A noise complaint and a broken streetlight have very different normal close times. Comparing across types would mostly measure which complaints each neighborhood files, not how fast the city responds.
-- **Quartiles of ZIPs.** ZIPs are ranked by % people of color and split into four equal groups, so each group has enough complaints to compare reliably.
-- **Open complaints are tracked, not ignored.** Days-to-close only works for closed complaints, so a second metric, **% still open after 30 days**, keeps slow neighborhoods from looking fast just because their complaints haven't closed yet.
-- **Geography is `incident_zip`.** Subway complaints are excluded because they have no neighborhood address.
-- **Bad dates are removed and counted.** Rows with a closed date before the created date are filtered out, and the number dropped is reported.
-- **Duplicate reports are flagged, not removed (v1).** Several people can report the same issue; this is a known limitation.
+- **Quartiles of ZIPs.** ZIPs are ranked by % people of color and split into four equal groups, so each group has enough complaints to compare reliably. Quartile 1 is the highest share.
+- **Which ZIPs count as NYC.** A ZIP is included only if at least 10 complaints were filed in it in 2026. Without this rule about 90 out-of-town ZIPs got in (San Francisco, Houston, Miami), because someone typed them on a complaint. The cutoff sits in a clear gap: out-of-town ZIPs topped out at 5 complaints and real ones started at 17.
+- **ZIPs under 1,000 residents are not ranked.** Census figures are survey estimates and are too noisy for tiny populations. Before this rule, a ZIP with 7 residents ranked first. The result is 182 ZIPs.
+- **Complaints with no usable ZIP are removed.** That is 27,701 complaints, about 0.9%. The original plan was to remove subway complaints, but the data showed subway is only 28% of the complaints with no ZIP; highways, streets, and bridges make up most of the rest.
+- **A complaint is closed if it has a closed date.** The status column is not used. The two disagree on few rows: 9,121 have an open status with a closed date, and 9 have a closed status with no date.
+- **Impossible dates are removed and counted.** 879 complaints were closed before they were filed, and 1 has a closed date in the future.
+- **Instant closures are flagged, not removed.** 57,725 complaints (about 2%) have a closed time equal to their filed time. They are concentrated in a few complaint types, such as Real Time Enforcement (about 40% of its complaints) and Water System (about 25%). The serving table carries the share for every row, because a high share can make a quartile look faster than it is.
+- **A complaint type needs 500 complaints in every quartile.** With small groups, one or two complaints swing the numbers. This keeps 78 of 185 complaint types and about 97% of complaints.
+- **Every row is accounted for.** On October 9: 3,025,670 complaints filed in 2026, minus 27,701 with no usable ZIP, minus 879 closed before filing, minus 1 future-dated, equals the 2,997,089 rows in `analytics.requests_clean`. When the three tables were joined on October 11, 7,045 of 3,050,611 cleaned complaints (0.23%) fell in ZIPs that are not ranked.
 - **Disparity, not causation.** Differences in close times can have many causes (complaint mix within a type, agency staffing, how cases are closed). This project shows *whether* a gap exists, not *why*.
 
 ### Pipeline
@@ -109,8 +151,14 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 - A few complaints filed before 2026 are in the raw table from early test runs. Transform filters them out.
 - The main table's columns are fixed in `01_setup.sql`. If the city adds a column to the dataset, the load stops with an error until the column is added there.
 - `load.py` assumes each pull is non-empty; an empty pull stops the run with an error.
-- Census ZCTAs approximate USPS ZIP codes but are not identical to them, so some 311 ZIPs may have no Census match. Transform will need to count how many.
-- The ACS year is changed by hand in `census.py` when a new release comes out.
+- Census ZCTAs approximate USPS ZIP codes but are not identical to them. Two ZIPs in the table, 11001 and 11040, appear to straddle the Queens and Nassau County border, so their Census numbers include residents outside the city.
+- The ACS year is changed by hand in `census.py` when a new release comes out. The margins of error that come with ACS estimates are not used.
+- Duplicate reports are not handled. Several people can report the same issue, and each report counts as its own complaint.
+- Complaint categories change during the year. Water System and Sewer have no complaints after July 29, 2026, while Water Maintenance and Sewer Maintenance run all year, so those rows cover different periods.
+- Some complaint types appear to be closed by a fixed rule and not when the work is done. Food Establishment has a median of 60.01 days in every quartile, and Vendor Enforcement about 19 minutes in every quartile. They are left in the table.
+- The reason for the instant closures is not known.
+- One known bad record is excluded by its `unique_key` in `03_requests_clean.sql` (filed February 14, 2026 with a closed date of December 14, 2026). A general rule also removes any closed date later than the time of the run.
+- The counts written in the SQL comments are from the day each file was written and will drift as new complaints load.
 
 ## Setup / How to Run
 
@@ -159,11 +207,19 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
    ```
    This loads the 2024 ACS numbers for every ZCTA into `raw.census_b03002` and prints the row count (33,772). It only needs to run again when a new ACS release comes out: change `year` at the top of `census.py` and rerun.
 
-7. **Keep it current**
+7. **Build the analytics tables**
+   ```bash
+   psql -U postgres -d nyc311 -f 02_zip_demographics.sql
+   psql -U postgres -d nyc311 -f 03_requests_clean.sql
+   psql -U postgres -d nyc311 -f 04_response_by_quartile.sql
+   ```
+   Run them in this order, since each one reads the tables before it. They can also be run from a SQL client such as DBeaver. `03_requests_clean.sql` rebuilds a table of about 3 million rows and takes a minute or so.
+
+8. **Keep it current**
    ```bash
    python load.py
    ```
-   This pulls complaints filed or closed in the last 7 days and upserts them. Run it at least once every 7 days. To test the extract step alone, run `python extract.py`.
+   This pulls complaints filed or closed in the last 7 days and upserts them. Run it at least once every 7 days, then rerun the three SQL files from step 7. To test the extract step alone, run `python extract.py`.
 
 ## Status & Roadmap
 
@@ -175,8 +231,10 @@ The raw layer is kept untouched so that Transform logic can be fixed and rerun w
 - [x] Main table and primary key created by the setup script
 - [x] Extract and load Census ACS table B03002
 - [ ] Make the load handle empty pulls
-- [ ] Transform: cleaning, filtering, metrics, and the 311–Census join in SQL
-- [ ] Serving table and Power BI dashboard
+- [x] Transform: cleaning, filtering, metrics, and the 311–Census join in SQL
+- [x] Serving table by complaint type and quartile
+- [ ] Power BI dashboard
+- [ ] ZIP-level table for a "find my neighborhood" view
 - [ ] Automation with Airflow and Docker
 - [ ] Migration to Azure
 
