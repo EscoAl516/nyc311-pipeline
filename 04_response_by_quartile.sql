@@ -13,7 +13,20 @@ CREATE TABLE analytics.response_by_quartile_type as
 -- Complaints in ZIPs that are not ranked drop out at the join.
 with flagged as (
 	select
-		rc.complaint_type,
+		-- Power BI treats text that differs only by capitalization as the same value,
+		-- so it merged PLUMBING (HPD) and Plumbing (DOB) into one. Where two complaint
+		-- types differ only by case, the agency is added to the name to keep them apart.
+		rc.complaint_type ||
+			case
+				when lower(rc.complaint_type) in (
+					select lower(complaint_type)
+					from analytics.requests_clean
+					group by lower(complaint_type)
+					having count(distinct complaint_type) > 1
+				)
+				then ' (' || rc.agency || ')'
+				else ''
+			end as complaint_type,
 		zd.quartile,
 		rc.days_to_close,
 		-- old_enough: filed at least 30 days before the newest complaint in the table.

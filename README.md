@@ -14,7 +14,7 @@ These are from the data as of October 11, 2026. They are a first look, not a fin
 
 ZIP codes are ranked by % people of color and split into four quartiles. Quartile 1 has the highest share and quartile 4 the lowest. Each complaint type is compared across the four.
 
-**There is no across-the-board gap.** Of the 78 complaint types with enough data to compare, the median time to close is longer in quartile 1 than in quartile 4 for 40, and the same or shorter for 38.
+**There is no across-the-board gap.** Of the 78 complaint types with enough data to compare, the median time to close is longer in quartile 1 than in quartile 4 for 40, and the same or shorter for 38. Measured by the share of complaints not closed within 30 days, 23 types differ by 3 percentage points or more: quartile 1 is slower in 10 of them and faster in 13. The other 55 differ by less.
 
 **The differences cluster by kind of complaint.** Tree complaints take longer in quartile 1:
 
@@ -33,6 +33,18 @@ Several housing-condition complaints close faster in quartile 1:
 | UNSANITARY CONDITION | 11.0 | 13.9 | 22.7 | 25.9 |
 
 These numbers show where gaps exist, not why. Quartile 1 files about five times as many water leak complaints as quartile 4, and volume, staffing, and how each agency closes cases could all play a part.
+
+## Dashboard
+
+A two-page Power BI report (`nyc311_dashboard.pbix`) built on the analytics tables.
+
+**The gap.** One bar per complaint type: the share of complaints not closed within 30 days in quartile 1 minus the same share in quartile 4, in percentage points. Red means quartile 1 is slower, blue means faster. Only the 23 complaint types with a gap of 3 points or more are shown.
+
+![Gap by complaint type](images/gap_by_type.png)
+
+**By complaint type.** Pick a complaint type to see its median days to close and its share of slow complaints in each quartile, with the number of complaints and the share closed instantly underneath.
+
+![Dashboard for one complaint type](images/dashboard.png)
 
 ## Data Sources
 
@@ -65,7 +77,13 @@ Transform (SQL)
     analytics.zip_demographics        one row per NYC ZIP, with its quartile
     │
     ▼  join on ZIP, group by complaint type and quartile
-analytics.response_by_quartile_type ──▶ Power BI dashboard (planned)
+analytics.response_by_quartile_type
+    │
+    ▼  pivot quartile 1 against quartile 4
+analytics.gap_by_type
+    │
+    ▼
+Power BI dashboard (nyc311_dashboard.pbix)
 ```
 
 1. **Extract** (`extract.py`)
@@ -88,13 +106,14 @@ analytics.response_by_quartile_type ──▶ Power BI dashboard (planned)
    - `load_census()` writes the result to `raw.census_b03002`, replacing the table on every run. Values and column names are stored exactly as received, plus an `acs_year` column added by the pipeline.
    - Nothing is filtered or calculated here. Narrowing to NYC and computing % people of color happen in Transform.
 
-5. **Transform** (SQL, three files run in order)
+5. **Transform** (SQL, four files run in order)
    - `02_zip_demographics.sql` builds `analytics.zip_demographics`, one row per NYC ZIP. It renames and casts the Census columns, computes % people of color, keeps only ZIPs that belong to NYC (see Key Decisions), and assigns each ZIP a quartile with `NTILE(4)`.
    - `03_requests_clean.sql` builds `analytics.requests_clean`, one row per complaint. It keeps the ten columns the analysis needs, casts the dates to timestamps, removes rows that can't be used, and adds `days_to_close`. Open complaints are kept, with `days_to_close` empty.
    - `04_response_by_quartile.sql` builds `analytics.response_by_quartile_type`, one row per complaint type and quartile. It joins the two tables above on ZIP and computes the metrics below.
-   - Every file drops and rebuilds its table, so all three can be rerun after each load.
+   - `05_gap_by_type.sql` builds `analytics.gap_by_type`, one row per complaint type. It pivots the table above so quartile 1 and quartile 4 sit side by side, and computes the gap between them.
+   - Every file drops and rebuilds its table, so all four can be rerun after each load.
 
-6. **Serve**: `analytics.response_by_quartile_type` is the table the dashboard reads.
+6. **Serve**: the dashboard reads two tables. `analytics.response_by_quartile_type` has one row per complaint type and quartile:
 
    | Column | Meaning |
    |---|---|
@@ -105,7 +124,16 @@ analytics.response_by_quartile_type ──▶ Power BI dashboard (planned)
    | `pct_not_closed_in_30_days` | Of complaints old enough to judge, the percent still open or closed after more than 30 days |
    | `instant_count`, `pct_closed_instantly` | Complaints closed at the moment they were filed, as a count and as a percent |
 
-   A Power BI dashboard on top of it is planned: median days to close by quartile for a selected complaint type. A ZIP-level table for a "find my neighborhood" view is planned after that.
+   `analytics.gap_by_type` has one row per complaint type:
+
+   | Column | Meaning |
+   |---|---|
+   | `q1_median_days`, `q4_median_days` | Median days to close in quartile 1 and quartile 4 |
+   | `median_ratio` | Quartile 1's median divided by quartile 4's |
+   | `q1_pct_slow`, `q4_pct_slow` | % not closed within 30 days in quartile 1 and quartile 4 |
+   | `pct_point_gap` | Quartile 1's percent minus quartile 4's. Positive means quartile 1 had more slow complaints |
+
+   A ZIP-level table for a "find my neighborhood" view is planned next.
 
 The raw layer is kept untouched so that Transform logic can be fixed and rerun without calling the API again, and any dashboard number can be traced back to the source data.
 
@@ -126,6 +154,8 @@ Counts in this section are from October 9 to 11, 2026.
 - **Impossible dates are removed and counted.** 879 complaints were closed before they were filed, and 1 has a closed date in the future.
 - **Instant closures are flagged, not removed.** 57,725 complaints (about 2%) have a closed time equal to their filed time. They are concentrated in a few complaint types, such as Real Time Enforcement (about 40% of its complaints) and Water System (about 25%). The serving table carries the share for every row, because a high share can make a quartile look faster than it is.
 - **A complaint type needs 500 complaints in every quartile.** With small groups, one or two complaints swing the numbers. This keeps 78 of 185 complaint types and about 97% of complaints.
+- **The gap chart uses percentage points, not a ratio.** Comparing medians as a ratio exaggerates complaint types that close in minutes: Water System would look like the largest gap in the city (53 minutes against 3.7 hours, 0.24x). A difference in days is dominated by types with long waits: For Hire Vehicle complaints alone would stretch the axis to +83 days. The difference in the share of complaints not closed within 30 days stays on one scale for every type. The median ratio is kept in the table.
+- **Complaint types that differ only by capitalization get the agency added to their name.** `PLUMBING` (housing, HPD) and `Plumbing` (buildings, DOB) are separate categories, but Power BI compares text without regard to case and merged them into one bar showing roughly the sum of their gaps. It was caught by checking a dashboard bar against the SQL table. `04_response_by_quartile.sql` now names them `PLUMBING (HPD)` and `Plumbing (DOB)`, using a rule that finds any such collision, not a fix for this one pair.
 - **Every row is accounted for.** On October 9: 3,025,670 complaints filed in 2026, minus 27,701 with no usable ZIP, minus 879 closed before filing, minus 1 future-dated, equals the 2,997,089 rows in `analytics.requests_clean`. When the three tables were joined on October 11, 7,045 of 3,050,611 cleaned complaints (0.23%) fell in ZIPs that are not ranked.
 - **Disparity, not causation.** Differences in close times can have many causes (complaint mix within a type, agency staffing, how cases are closed). This project shows *whether* a gap exists, not *why*.
 
@@ -212,6 +242,7 @@ Counts in this section are from October 9 to 11, 2026.
    psql -U postgres -d nyc311 -f 02_zip_demographics.sql
    psql -U postgres -d nyc311 -f 03_requests_clean.sql
    psql -U postgres -d nyc311 -f 04_response_by_quartile.sql
+   psql -U postgres -d nyc311 -f 05_gap_by_type.sql
    ```
    Run them in this order, since each one reads the tables before it. They can also be run from a SQL client such as DBeaver. `03_requests_clean.sql` rebuilds a table of about 3 million rows and takes a minute or so.
 
@@ -219,7 +250,11 @@ Counts in this section are from October 9 to 11, 2026.
    ```bash
    python load.py
    ```
-   This pulls complaints filed or closed in the last 7 days and upserts them. Run it at least once every 7 days, then rerun the three SQL files from step 7. To test the extract step alone, run `python extract.py`.
+   This pulls complaints filed or closed in the last 7 days and upserts them. Run it at least once every 7 days, then rerun the four SQL files from step 7. To test the extract step alone, run `python extract.py`.
+
+9. **Open the dashboard**
+
+   Open `nyc311_dashboard.pbix` in [Power BI Desktop](https://www.microsoft.com/power-bi/desktop) (free, Windows). It connects to PostgreSQL on `localhost`, database `nyc311`, with your database user and password. After rerunning the SQL files, click **Home → Refresh**.
 
 ## Status & Roadmap
 
@@ -233,7 +268,7 @@ Counts in this section are from October 9 to 11, 2026.
 - [ ] Make the load handle empty pulls
 - [x] Transform: cleaning, filtering, metrics, and the 311–Census join in SQL
 - [x] Serving table by complaint type and quartile
-- [ ] Power BI dashboard
+- [x] Power BI dashboard: the gap across complaint types, and a view for one complaint type
 - [ ] ZIP-level table for a "find my neighborhood" view
 - [ ] Automation with Airflow and Docker
 - [ ] Migration to Azure
