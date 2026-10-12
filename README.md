@@ -36,7 +36,7 @@ These numbers show where gaps exist, not why. Quartile 1 files about five times 
 
 ## Dashboard
 
-A two-page Power BI report (`nyc311_dashboard.pbix`) built on the analytics tables.
+A two-page Power BI report (`nyc311_dashboard.pbix`) built on the analytics tables. The data is stored inside the file, so it can be explored in Power BI Desktop without a database. The two tables it reads are also in [`data/`](data/) as CSV files, which GitHub shows as a searchable table.
 
 **The gap.** One bar per complaint type: the share of complaints not closed within 30 days in quartile 1 minus the same share in quartile 4, in percentage points. Red means quartile 1 is slower, blue means faster. Only the 23 complaint types with a gap of 3 points or more are shown.
 
@@ -250,9 +250,15 @@ Counts in this section are from October 9 to 11, 2026.
    ```bash
    python load.py
    ```
-   This pulls complaints filed or closed in the last 7 days and upserts them. Run it at least once every 7 days, then rerun the four SQL files from step 7. To test the extract step alone, run `python extract.py`.
+   This pulls complaints filed or closed in the last 7 days and upserts them. Run it at least once every 7 days, then rerun the four SQL files from step 7 and the export from step 9. To test the extract step alone, run `python extract.py`.
 
-9. **Open the dashboard**
+9. **Export the dashboard tables to CSV**
+   ```bash
+   python export_csv.py
+   ```
+   This writes `data/gap_by_type.csv` (one row per complaint type) and `data/response_by_quartile_type.csv` (one row per complaint type and quartile), and prints the row count of each.
+
+10. **Open the dashboard**
 
    Open `nyc311_dashboard.pbix` in [Power BI Desktop](https://www.microsoft.com/power-bi/desktop) (free, Windows). It connects to PostgreSQL on `localhost`, database `nyc311`, with your database user and password. After rerunning the SQL files, click **Home → Refresh**.
 

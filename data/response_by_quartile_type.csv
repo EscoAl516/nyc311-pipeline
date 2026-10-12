@@ -1,0 +1,313 @@
+complaint_type,quartile,complaint_count,instant_count,median_days_to_close,pct_not_closed_in_30_days,pct_closed_instantly
+Abandoned Vehicle,1,17463,0,0.092,0.1,0.0
+Abandoned Vehicle,2,20795,0,0.084,0.0,0.0
+Abandoned Vehicle,3,11296,0,0.119,0.1,0.0
+Abandoned Vehicle,4,8926,0,0.119,0.0,0.0
+Air Quality,1,1027,0,2.094,1.1,0.0
+Air Quality,2,1637,1,1.948,1.7,0.1
+Air Quality,3,3318,0,1.764,13.1,0.0
+Air Quality,4,2009,0,2.622,1.6,0.0
+Animal-Abuse,1,3183,0,0.084,0.0,0.0
+Animal-Abuse,2,2953,0,0.076,0.0,0.0
+Animal-Abuse,3,1597,0,0.076,0.1,0.0
+Animal-Abuse,4,1312,0,0.067,0.0,0.0
+Animal in a Park,1,595,0,0.048,5.5,0.0
+Animal in a Park,2,947,0,0.059,4.8,0.0
+Animal in a Park,3,954,0,0.057,4.2,0.0
+Animal in a Park,4,2332,0,0.059,5.5,0.0
+APPLIANCE,1,10712,2,14.777,32.9,0.0
+APPLIANCE,2,6195,0,15.943,34.4,0.0
+APPLIANCE,3,2562,0,15.283,33.3,0.0
+APPLIANCE,4,1202,2,16.793,38.3,0.2
+Blocked Driveway,1,60974,0,0.068,0.1,0.0
+Blocked Driveway,2,39763,0,0.07,0.0,0.0
+Blocked Driveway,3,33491,0,0.073,0.0,0.0
+Blocked Driveway,4,17605,0,0.069,0.0,0.0
+Building/Use,1,8990,1261,29.379,51.9,14.0
+Building/Use,2,5752,973,27.085,51.7,16.9
+Building/Use,3,3800,689,26.64,52.7,18.1
+Building/Use,4,2680,452,22.645,49.1,16.9
+Cannabis Retailer,1,1212,0,47.725,84.7,0.0
+Cannabis Retailer,2,1015,0,47.582,86.8,0.0
+Cannabis Retailer,3,651,0,47.07,80.7,0.0
+Cannabis Retailer,4,705,0,35.752,63.5,0.0
+Consumer Complaint,1,4908,0,18.03,48.8,0.0
+Consumer Complaint,2,4085,0,20.702,48.4,0.0
+Consumer Complaint,3,4079,0,27.75,52.0,0.0
+Consumer Complaint,4,3620,0,20.063,45.7,0.0
+Curb Condition,1,1511,0,17.309,20.9,0.0
+Curb Condition,2,1910,0,17.565,23.1,0.0
+Curb Condition,3,1759,0,15.84,20.0,0.0
+Curb Condition,4,1876,0,15.668,22.1,0.0
+Damaged Tree,1,8021,0,2.314,31.5,0.0
+Damaged Tree,2,10824,0,2.759,30.1,0.0
+Damaged Tree,3,10309,0,2.724,29.8,0.0
+Damaged Tree,4,9859,0,2.433,23.4,0.0
+Dead Animal,1,2427,0,1.724,0.0,0.0
+Dead Animal,2,2339,0,1.756,0.2,0.0
+Dead Animal,3,1990,0,1.738,0.2,0.0
+Dead Animal,4,1984,0,1.831,0.8,0.0
+Dead/Dying Tree,1,1882,0,14.891,63.4,0.0
+Dead/Dying Tree,2,2760,0,15.546,61.3,0.0
+Dead/Dying Tree,3,2722,0,13.765,60.7,0.0
+Dead/Dying Tree,4,2588,0,11.03,48.8,0.0
+Derelict Vehicles,1,11185,0,0.853,0.1,0.0
+Derelict Vehicles,2,7097,0,0.901,0.1,0.0
+Derelict Vehicles,3,4619,0,0.913,0.1,0.0
+Derelict Vehicles,4,2782,0,0.869,0.2,0.0
+Dirty Condition,1,16747,0,1.234,3.6,0.0
+Dirty Condition,2,16931,0,1.243,1.3,0.0
+Dirty Condition,3,12362,0,1.19,0.9,0.0
+Dirty Condition,4,11574,0,1.294,1.6,0.0
+DOOR/WINDOW,1,19086,1,12.784,26.8,0.0
+DOOR/WINDOW,2,13722,0,13.027,25.9,0.0
+DOOR/WINDOW,3,6122,1,14.188,28.1,0.0
+DOOR/WINDOW,4,3246,2,16.086,33.5,0.1
+Drug Activity,1,2262,0,0.06,0.2,0.0
+Drug Activity,2,3921,0,0.032,0.1,0.0
+Drug Activity,3,597,0,0.064,0.0,0.0
+Drug Activity,4,640,0,0.055,0.0,0.0
+ELECTRIC,1,13073,2,7.223,20.9,0.0
+ELECTRIC,2,9213,1,7.458,22.2,0.0
+ELECTRIC,3,3929,0,8.382,24.3,0.0
+ELECTRIC,4,2478,1,8.188,25.6,0.0
+Elevator (DOB),1,9885,694,3.373,19.9,7.0
+Elevator (DOB),2,5983,482,4.413,23.8,8.1
+Elevator (DOB),3,3166,282,4.571,22.0,8.9
+Elevator (DOB),4,1811,157,6.471,23.0,8.7
+Encampment,1,3170,0,0.13,5.0,0.0
+Encampment,2,4901,0,0.114,5.6,0.0
+Encampment,3,12649,0,0.077,10.3,0.0
+Encampment,4,14945,0,0.08,9.1,0.0
+FLOORING/STAIRS,1,11411,1,12.062,23.9,0.0
+FLOORING/STAIRS,2,8441,0,11.652,23.9,0.0
+FLOORING/STAIRS,3,3190,0,12.548,23.9,0.0
+FLOORING/STAIRS,4,1731,1,13.014,27.5,0.1
+Food Establishment,1,2100,0,60.011,96.0,0.0
+Food Establishment,2,2699,0,60.012,96.8,0.0
+Food Establishment,3,3030,0,60.011,95.1,0.0
+Food Establishment,4,3517,0,60.009,93.0,0.0
+For Hire Vehicle Complaint,1,1521,0,104.838,94.8,0.0
+For Hire Vehicle Complaint,2,2178,0,22.444,83.0,0.0
+For Hire Vehicle Complaint,3,4504,0,22.06,79.2,0.0
+For Hire Vehicle Complaint,4,5731,0,21.88,77.2,0.0
+GENERAL,1,14231,250,13.057,28.5,1.8
+GENERAL,2,10636,225,14.079,30.0,2.1
+GENERAL,3,7412,183,12.915,24.5,2.5
+GENERAL,4,3162,133,15.105,31.9,4.2
+General Construction/Plumbing,1,7810,1733,1.396,15.9,22.2
+General Construction/Plumbing,2,7903,1513,1.522,17.2,19.1
+General Construction/Plumbing,3,9033,1765,2.24,21.1,19.5
+General Construction/Plumbing,4,7815,1391,2.318,18.5,17.8
+Graffiti,1,2139,1,9.376,37.8,0.0
+Graffiti,2,4222,1,7.671,33.7,0.0
+Graffiti,3,2468,2,10.641,37.8,0.1
+Graffiti,4,3620,2,7.615,41.8,0.1
+HEAT/HOT WATER,1,95371,1,1.719,7.1,0.0
+HEAT/HOT WATER,2,70349,3,1.83,4.8,0.0
+HEAT/HOT WATER,3,32549,2,1.986,3.7,0.0
+HEAT/HOT WATER,4,21074,1,1.986,4.1,0.0
+Homeless Person Assistance,1,2535,0,0.17,0.5,0.0
+Homeless Person Assistance,2,3975,0,0.19,0.3,0.0
+Homeless Person Assistance,3,8181,0,0.225,0.2,0.0
+Homeless Person Assistance,4,9261,0,0.19,0.2,0.0
+Illegal Dumping,1,11176,0,2.317,1.3,0.0
+Illegal Dumping,2,7630,0,2.189,0.7,0.0
+Illegal Dumping,3,6135,0,2.117,0.7,0.0
+Illegal Dumping,4,5840,0,2.158,1.3,0.0
+Illegal Fireworks,1,3088,0,0.041,0.0,0.0
+Illegal Fireworks,2,3932,0,0.035,0.0,0.0
+Illegal Fireworks,3,1947,0,0.036,0.1,0.0
+Illegal Fireworks,4,1610,0,0.042,0.1,0.0
+Illegal Parking,1,113114,0,0.068,0.0,0.0
+Illegal Parking,2,136258,0,0.067,0.0,0.0
+Illegal Parking,3,131250,0,0.064,0.0,0.0
+Illegal Parking,4,105253,0,0.056,0.0,0.0
+Illegal Posting,1,1060,0,2.305,0.0,0.0
+Illegal Posting,2,1136,0,2.952,0.1,0.0
+Illegal Posting,3,1146,0,2.121,0.1,0.0
+Illegal Posting,4,987,0,3.699,0.0,0.0
+Illegal Tree Damage,1,987,0,13.059,54.5,0.0
+Illegal Tree Damage,2,1238,0,10.74,55.3,0.0
+Illegal Tree Damage,3,1751,0,9.973,52.5,0.0
+Illegal Tree Damage,4,2038,0,1.911,26.6,0.0
+Indoor Air Quality,1,2508,0,1.455,0.1,0.0
+Indoor Air Quality,2,2647,0,1.405,0.3,0.0
+Indoor Air Quality,3,1912,0,1.436,0.2,0.0
+Indoor Air Quality,4,1608,0,1.355,0.3,0.0
+Lead,1,1845,0,1.146,3.5,0.0
+Lead,2,2766,0,1.103,2.8,0.0
+Lead,3,2861,0,1.092,3.0,0.0
+Lead,4,3056,0,1.113,2.5,0.0
+Litter Basket Request,1,655,0,2.725,0.0,0.0
+Litter Basket Request,2,927,0,2.721,0.8,0.0
+Litter Basket Request,3,851,0,2.321,0.0,0.0
+Litter Basket Request,4,902,0,2.085,0.3,0.0
+Maintenance or Facility,1,4961,0,9.118,35.0,0.0
+Maintenance or Facility,2,6633,0,11.715,40.7,0.0
+Maintenance or Facility,3,6572,0,11.05,39.7,0.0
+Maintenance or Facility,4,6567,0,10.047,36.2,0.0
+Missed Collection,1,7680,0,1.956,0.0,0.0
+Missed Collection,2,6873,0,1.998,0.0,0.0
+Missed Collection,3,6816,0,2.012,0.0,0.0
+Missed Collection,4,7006,0,2.051,0.0,0.0
+Noise,1,7458,2,2.881,0.7,0.0
+Noise,2,12073,1,2.49,0.8,0.0
+Noise,3,12961,0,2.815,1.0,0.0
+Noise,4,15047,0,2.976,1.3,0.0
+Noise - Commercial,1,9500,0,0.05,0.0,0.0
+Noise - Commercial,2,15653,0,0.039,0.0,0.0
+Noise - Commercial,3,11503,0,0.039,0.0,0.0
+Noise - Commercial,4,10638,0,0.041,0.0,0.0
+Noise - Park,1,1772,0,0.047,0.1,0.0
+Noise - Park,2,2283,0,0.047,0.1,0.0
+Noise - Park,3,1521,0,0.053,0.0,0.0
+Noise - Park,4,1451,0,0.036,0.0,0.0
+Noise - Residential,1,122692,0,0.054,0.0,0.0
+Noise - Residential,2,82481,0,0.052,0.0,0.0
+Noise - Residential,3,54539,0,0.046,0.0,0.0
+Noise - Residential,4,32450,0,0.049,0.0,0.0
+Noise - Street/Sidewalk,1,61815,0,0.055,0.1,0.0
+Noise - Street/Sidewalk,2,51338,0,0.048,0.0,0.0
+Noise - Street/Sidewalk,3,20250,0,0.04,0.0,0.0
+Noise - Street/Sidewalk,4,16019,0,0.038,0.0,0.0
+Noise - Vehicle,1,12341,0,0.054,0.1,0.0
+Noise - Vehicle,2,19232,0,0.032,0.0,0.0
+Noise - Vehicle,3,5912,0,0.048,0.1,0.0
+Noise - Vehicle,4,5250,0,0.046,0.0,0.0
+Non-Emergency Police Matter,1,5693,0,0.062,0.1,0.0
+Non-Emergency Police Matter,2,4505,0,0.073,0.0,0.0
+Non-Emergency Police Matter,3,4930,0,0.042,0.0,0.0
+Non-Emergency Police Matter,4,3525,0,0.056,0.0,0.0
+Obstruction,1,5525,0,1.146,2.5,0.0
+Obstruction,2,4962,0,1.61,2.2,0.0
+Obstruction,3,3856,0,1.416,1.8,0.0
+Obstruction,4,4102,0,1.642,3.4,0.0
+Overgrown Tree/Branches,1,5706,0,11.02,85.5,0.0
+Overgrown Tree/Branches,2,5988,0,9.58,83.8,0.0
+Overgrown Tree/Branches,3,4778,0,5.91,80.8,0.0
+Overgrown Tree/Branches,4,4443,0,4.826,62.5,0.0
+PAINT/PLASTER,1,25696,0,8.136,16.7,0.0
+PAINT/PLASTER,2,18203,0,7.974,17.0,0.0
+PAINT/PLASTER,3,7130,1,8.399,19.3,0.0
+PAINT/PLASTER,4,3916,1,8.895,23.5,0.0
+Panhandling,1,1217,0,0.08,0.0,0.0
+Panhandling,2,1276,0,0.068,0.0,0.0
+Panhandling,3,1465,0,0.045,0.2,0.0
+Panhandling,4,1890,0,0.045,0.1,0.0
+Plumbing (DOB),1,901,126,14.541,43.3,14.0
+Plumbing (DOB),2,804,125,10.495,42.0,15.5
+Plumbing (DOB),3,738,79,12.481,41.0,10.7
+Plumbing (DOB),4,703,85,12.302,38.0,12.1
+PLUMBING (HPD),1,32300,4,8.396,23.0,0.0
+PLUMBING (HPD),2,21572,1,8.418,22.9,0.0
+PLUMBING (HPD),3,8315,0,8.65,24.7,0.0
+PLUMBING (HPD),4,5441,0,7.039,23.4,0.0
+Real Time Enforcement,1,713,271,0.385,0.8,38.0
+Real Time Enforcement,2,1165,433,0.391,1.4,37.2
+Real Time Enforcement,3,1797,695,0.298,1.7,38.7
+Real Time Enforcement,4,1400,637,0.138,0.7,45.5
+Residential Disposal Complaint,1,2574,0,1.254,0.0,0.0
+Residential Disposal Complaint,2,3133,0,1.627,0.4,0.0
+Residential Disposal Complaint,3,2853,0,1.433,0.6,0.0
+Residential Disposal Complaint,4,2486,0,1.654,0.5,0.0
+Rodent,1,5548,970,5.936,12.3,17.5
+Rodent,2,6474,995,5.918,13.9,15.4
+Rodent,3,5265,738,7.157,17.5,14.0
+Rodent,4,4396,605,6.71,14.4,13.8
+Root/Sewer/Sidewalk Condition,1,2323,0,62.339,96.9,0.0
+Root/Sewer/Sidewalk Condition,2,2025,0,41.996,97.0,0.0
+Root/Sewer/Sidewalk Condition,3,1732,0,27.858,96.3,0.0
+Root/Sewer/Sidewalk Condition,4,2080,0,31.015,96.7,0.0
+SAFETY (HPD),1,4987,0,8.364,18.1,0.0
+SAFETY (HPD),2,3577,0,8.214,18.7,0.0
+SAFETY (HPD),3,2135,0,8.15,20.5,0.0
+SAFETY (HPD),4,1086,0,7.35,20.7,0.0
+Sanitation Worker or Vehicle Complaint,1,774,0,3.996,1.1,0.0
+Sanitation Worker or Vehicle Complaint,2,665,0,3.515,1.0,0.0
+Sanitation Worker or Vehicle Complaint,3,578,0,3.268,1.1,0.0
+Sanitation Worker or Vehicle Complaint,4,625,0,3.12,0.5,0.0
+Sewer,1,6077,54,0.169,6.4,0.9
+Sewer,2,5053,113,0.229,5.8,2.2
+Sewer,3,3946,86,0.314,6.6,2.2
+Sewer,4,3284,178,0.197,7.2,5.4
+Sewer Maintenance,1,3139,1,0.446,7.0,0.0
+Sewer Maintenance,2,2810,1,0.6,6.7,0.0
+Sewer Maintenance,3,2219,2,0.654,7.6,0.1
+Sewer Maintenance,4,2320,2,0.313,9.1,0.1
+Sidewalk Condition,1,4563,0,7.844,6.2,0.0
+Sidewalk Condition,2,5291,0,7.894,8.5,0.0
+Sidewalk Condition,3,5460,0,7.953,8.4,0.0
+Sidewalk Condition,4,5731,0,7.787,8.1,0.0
+Smoking or Vaping,1,1569,0,60.002,81.4,0.0
+Smoking or Vaping,2,2262,0,54.463,78.5,0.0
+Smoking or Vaping,3,1607,0,52.955,77.6,0.0
+Smoking or Vaping,4,913,0,60.003,86.2,0.0
+Snow or Ice,1,10682,0,2.434,0.3,0.0
+Snow or Ice,2,13080,0,2.813,0.2,0.0
+Snow or Ice,3,15502,0,2.214,0.2,0.0
+Snow or Ice,4,15753,0,1.704,0.1,0.0
+Special Projects Inspection Team (SPIT),1,535,120,7.37,37.8,22.4
+Special Projects Inspection Team (SPIT),2,872,244,9.731,38.1,28.0
+Special Projects Inspection Team (SPIT),3,890,273,9.048,38.6,30.7
+Special Projects Inspection Team (SPIT),4,789,256,6.427,37.8,32.4
+Street Condition,1,28566,4618,1.292,10.2,16.2
+Street Condition,2,29322,4226,1.393,10.5,14.4
+Street Condition,3,25755,3629,1.541,10.1,14.1
+Street Condition,4,23705,3177,1.715,8.4,13.4
+Street Light Condition,1,7729,170,9.591,21.1,2.2
+Street Light Condition,2,7478,59,9.836,22.1,0.8
+Street Light Condition,3,6159,33,9.96,26.0,0.5
+Street Light Condition,4,7004,48,9.96,27.3,0.7
+Street Sign - Damaged,1,953,0,5.386,13.2,0.0
+Street Sign - Damaged,2,1129,0,4.001,14.8,0.0
+Street Sign - Damaged,3,1152,0,3.944,13.2,0.0
+Street Sign - Damaged,4,999,0,3.849,11.9,0.0
+Street Sign - Dangling,1,781,0,6.729,4.5,0.0
+Street Sign - Dangling,2,844,0,5.871,4.1,0.0
+Street Sign - Dangling,3,791,0,5.924,5.7,0.0
+Street Sign - Dangling,4,759,0,4.066,6.8,0.0
+Street Sign - Missing,1,720,0,4.592,20.7,0.0
+Street Sign - Missing,2,813,0,3.916,26.9,0.0
+Street Sign - Missing,3,648,0,4.003,24.2,0.0
+Street Sign - Missing,4,667,0,4.123,20.1,0.0
+Street Sweeping Complaint,1,2459,0,3.07,0.2,0.0
+Street Sweeping Complaint,2,1586,0,2.116,0.1,0.0
+Street Sweeping Complaint,3,1293,0,1.986,1.8,0.0
+Street Sweeping Complaint,4,1037,0,2.131,0.0,0.0
+Traffic,1,928,0,0.055,0.0,0.0
+Traffic,2,4046,0,0.014,0.0,0.0
+Traffic,3,1122,0,0.055,0.0,0.0
+Traffic,4,1157,0,0.067,0.0,0.0
+Traffic Signal Condition,1,11049,1019,0.128,3.7,9.2
+Traffic Signal Condition,2,12603,1258,0.111,3.8,10.0
+Traffic Signal Condition,3,11596,1491,0.093,3.3,12.9
+Traffic Signal Condition,4,9813,1217,0.088,2.7,12.4
+UNSANITARY CONDITION,1,49759,2,10.951,22.6,0.0
+UNSANITARY CONDITION,2,33635,1,11.076,22.5,0.0
+UNSANITARY CONDITION,3,16753,1,12.826,25.9,0.0
+UNSANITARY CONDITION,4,10116,1,13.862,25.9,0.0
+Vendor Enforcement,1,3244,0,0.014,0.0,0.0
+Vendor Enforcement,2,2741,0,0.014,0.0,0.0
+Vendor Enforcement,3,3832,0,0.014,0.0,0.0
+Vendor Enforcement,4,8729,0,0.014,0.0,0.0
+Violation of Park Rules,1,979,0,0.031,0.1,0.0
+Violation of Park Rules,2,792,0,0.033,0.8,0.0
+Violation of Park Rules,3,1048,0,0.042,1.0,0.0
+Violation of Park Rules,4,1477,0,0.041,0.8,0.0
+Water Conservation,1,2350,1,0.412,0.7,0.0
+Water Conservation,2,1559,0,0.713,0.5,0.0
+Water Conservation,3,1025,2,0.672,0.3,0.2
+Water Conservation,4,987,0,0.742,1.6,0.0
+WATER LEAK,1,17454,0,10.955,23.1,0.0
+WATER LEAK,2,13080,1,11.419,24.0,0.0
+WATER LEAK,3,5417,0,13.485,28.4,0.0
+WATER LEAK,4,3154,0,15.257,30.9,0.0
+Water Maintenance,1,5984,3,0.477,5.7,0.1
+Water Maintenance,2,5439,7,0.21,5.4,0.1
+Water Maintenance,3,3492,4,0.34,6.3,0.1
+Water Maintenance,4,2831,7,0.245,4.8,0.2
+Water System,1,22270,7015,0.037,4.0,31.5
+Water System,2,15926,4139,0.067,6.2,26.0
+Water System,3,10133,1795,0.079,6.9,17.7
+Water System,4,8345,1518,0.155,5.4,18.2
